@@ -1,3 +1,7 @@
+# Specific ignore
+*_private.py
+
+# Python
 *.py[cod]
 
 # C extensions
