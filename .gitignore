@@ -1,5 +1,7 @@
 # Specific ignore
 *_private.py
+files/etc/ssl/certs/*
+files/etc/ssl/private/*
 
 # Python
 *.py[cod]

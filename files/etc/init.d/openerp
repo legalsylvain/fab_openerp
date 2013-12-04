@@ -1,0 +1,61 @@
+#! /bin/sh
+
+### BEGIN INIT INFO
+# Provides:          openerp-server
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Should-Start:      $network
+# Should-Stop:       $network
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Enterprise Resource Management software
+# Description:       Open ERP is a complete ERP and CRM software.
+### END INIT INFO
+
+OE_CONFIG_FILE=%(OPENERP_DIRECTORY)sconfig.conf
+OE_USER=%(SYSTEM_USER_OPENERP)s
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+NAME=%(OPENERP_SCRIPT_NAME)s
+DESC="Server OpenERP"
+DAEMON=%(OPENERP_SCRIPT_DIRECTORY)s$NAME
+PIDFILE=/var/run/$NAME.pid
+SCRIPTNAME=/etc/init.d/$NAME
+
+
+test -x ${DAEMON} || exit 0
+
+set -e
+
+case "${1}" in
+        start)
+                echo "Starting ${DESC}: "
+                start-stop-daemon --start --quiet --pidfile /var/run/${NAME}.pid \
+                        --chuid ${OE_USER} --background --make-pidfile \
+                        --exec ${DAEMON} -- --config=${OE_CONFIG_FILE} \
+                            --syslog
+                echo "${DESC} Started."
+                ;;
+        stop)
+                echo -n "Stopping ${DESC}: "
+                start-stop-daemon --stop --quiet --pidfile /var/run/${NAME}.pid \
+                        --oknodo
+                echo "${DESC} Stopped."
+                ;;
+        restart|force-reload)
+                echo "Restarting ${DESC}: "
+                start-stop-daemon --stop --quiet --pidfile /var/run/${NAME}.pid \
+                        --oknodo
+                sleep 1
+                start-stop-daemon --start --quiet --pidfile /var/run/${NAME}.pid \
+                        --chuid ${OE_USER} --background --make-pidfile \
+                        --exec ${DAEMON} -- --config=${OE_CONFIG_FILE} \
+                            --syslog
+                echo "${DESC} Restarted."
+                ;;
+        *)
+                N=/etc/init.d/${NAME}
+                echo "Usage: ${NAME} {start|stop|restart|force-reload}" >&2
+                exit 1
+                ;;
+esac
+exit 0
