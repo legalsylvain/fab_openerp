@@ -6,14 +6,18 @@
 # If there is parameters with '***' value, please redefine in a config private file
 ################################################################################
 
+DEPLOYMENT_TYPE = 'production'
+
 ### Server Configuration ###
 SERVER_HOSTNAME = '***'
+ADMIN_USER = '***'
+ADMIN_GROUP = '***'
 
 ### Mail Configuration ###
-MAIL_SMTP = '***'
-MAIL_DOMAIN = '***'
-MAIL_LOGIN = '***'
-MAIL_PASSWORD = '***'
+MAIL_MAILHUB = '***'
+MAIL_AUTH_USER = '***'
+MAIL_AUTH_PASS = '***'
+MAIL_AUTH_METHOD = '***'
 
 ### Database configuration ###
 DB_HOST = 'localhost'
@@ -49,6 +53,12 @@ OPENERP_DATABASES = ['***', '***']
 
 ### OpenERP Configuration (Backup folder) ###
 OPENERP_BACKUP_PATH = '***'
+OPENERP_BACKUP_MAIL = '***'
+OPENERP_BACKUP_MAX_DAY = '***'
+OPENERP_BACKUP_GROUP = '***'
+OPENERP_BACKUP_TIMESPEC = '***'
+SYSTEM_BACKUP_USER = '***'
+SYSTEM_BACKUP_PWD = '***'
 
 ### OpenERP logs ###
 OPENERP_LOG_FOLDER = '/var/log/openerp/'
@@ -66,7 +76,7 @@ PACKAGES_TO_UNINSTALL = [
 ]
 PACKAGES_TO_INSTALL = [
     'byobu', 'di', 'bzr', 'vim', 'nano', 'python-pip',
-    'postgresql-9.1', 'apache2', 'proftpd', 'ssmtp', 'sendmail',
+    'postgresql-9.1', 'apache2', 'proftpd', 'ssmtp', 
     'python2.7', 'python-dateutil', 'python-feedparser', 'python-gdata', 'python-ldap', 'python-libxslt1',
     'python-lxml', 'python-mako', 'python-openid', 'python-psycopg2', 'python-pybabel', 'python-pychart',
     'python-pydot', 'python-pyparsing', 'python-reportlab', 'python-simplejson', 'python-tz', 'python-vatnumber',
