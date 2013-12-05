@@ -62,9 +62,11 @@ SYSTEM_BACKUP_PWD = '***'
 
 ### OpenERP logs ###
 OPENERP_LOG_FOLDER = '/var/log/openerp/'
+
 OPENERP_NORMAL_LOG_PATH =       OPENERP_LOG_FOLDER + 'openerp-syslog.log'
 OPENERP_NORMAL_LOG_PATH_ALL =   OPENERP_LOG_FOLDER + '*.log'
-OPENERP_ERROR_LOG_PATH =        OPENERP_LOG_FOLDER + 'openerp-syslog.err'
+OPENERP_ERROR_LOG_NAME =  'openerp-syslog.err'
+OPENERP_ERROR_LOG_PATH =        OPENERP_LOG_FOLDER + OPENERP_ERROR_LOG_NAME
 OPENERP_ERROR_LOG_PATH_ALL =    OPENERP_LOG_FOLDER + '*.err'
 
 ### OpenERP Configuration (Miscelleaneous) ###

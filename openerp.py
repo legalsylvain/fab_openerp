@@ -27,6 +27,10 @@ else:
     assert("problem !")
 
 @task
+def test():
+    _require_nightly_production_script()
+    
+@task
 def install():
     '''This task's goal is to install all the packages required for running 
 OpenERP on a Debian and getting OpenERP sources by launchpad / github'''
@@ -60,8 +64,11 @@ OpenERP on a Debian and getting OpenERP sources by launchpad / github'''
     ## Managing openerp logs by syslog 
     _require_configured_openerp_log()
     
-    ## OpenERP backup 
-    _require_backup_script()
+    ## Nightly Script  
+    if DEPLOYMENT_TYPE == 'production': 
+        _require_nightly_production_script()
+    elif DEPLOYMENT_TYPE == 'test': 
+        _require_nightly_test_script()
     
     ## Configure ftp server
     _require_configured_ftp_server()
@@ -100,16 +107,14 @@ def update():
 #    require.service.started(OPENERP_SERVICE_NAME)
 #    require.service.started('apache2')
 
-def _require_services_started():
+def _require_services_stopped():
     ## Stopping apache2, postgresql, Openerp service
     require.service.stopped('apache2')
-    require.service.stopped('postgresql')
     require.service.stopped(OPENERP_SERVICE_NAME)
 
-def _require_services_stopped():
+def _require_services_started():
     ## starting apache2, postgresql, Openerp service
     require.service.started('apache2')
-    require.service.started('postgresql')
     require.service.started(OPENERP_SERVICE_NAME)
 
 def _require_sendmail():
@@ -183,7 +188,7 @@ def _require_postgres_and_user():
         connection_limit=20
     )
 
-def _require_backup_script():
+def _require_nightly_production_script():
     '''Create a script to backup openerp databases and plan execution 
     '''
     require.group(OPENERP_BACKUP_GROUP)
@@ -191,11 +196,14 @@ def _require_backup_script():
         OPENERP_BACKUP_PATH, 
         owner=ADMIN_USER, group=OPENERP_BACKUP_GROUP, mode='755', use_sudo=True
     )
-    command_pg_dump_lines , command_move_lines = '', ''
+    command_pg_dump_lines , command_move_lines, command_put_ftp_lines = '', '', ''
     for database in OPENERP_DATABASES:
         command_pg_dump_lines += 'su - postgres -c "pg_dump --format=c %s --file=/tmp/postgres_%s.dump"\n' %(database, database)
         command_move_lines += 'mv /tmp/postgres_%s.dump $aRepertoireArchive' %(database)
+        command_put_ftp_lines += 'put postgres_%s.dump' %(database)
     params = {
+        'EMAIL_ADMIN' : EMAIL_ADMIN,
+        'SERVER_HOSTNAME' : SERVER_HOSTNAME,
         'OPENERP_BACKUP_PATH' : OPENERP_BACKUP_PATH,
         'OPENERP_BACKUP_MAX_DAY' : OPENERP_BACKUP_MAX_DAY,
         'OPENERP_BACKUP_MAIL' : OPENERP_BACKUP_MAIL,
@@ -203,15 +211,23 @@ def _require_backup_script():
         'OPENERP_BACKUP_GROUP' : OPENERP_BACKUP_GROUP,
         'command_pg_dump_lines' : command_pg_dump_lines,
         'command_move_lines' : command_move_lines,
+        'command_put_ftp_lines' : command_put_ftp_lines,
+        'EXTERNAL_BACKUP_HOST' : EXTERNAL_BACKUP_HOST,
+        'EXTERNAL_BACKUP_PORT' : EXTERNAL_BACKUP_PORT,
+        'EXTERNAL_BACKUP_LOGIN' : EXTERNAL_BACKUP_LOGIN,
+        'EXTERNAL_BACKUP_PASSWORD' : EXTERNAL_BACKUP_PASSWORD,
+        'EXTERNAL_BACKUP_ROOT_FOLDER' : EXTERNAL_BACKUP_ROOT_FOLDER,
+        'OPENERP_ERROR_LOG_NAME' : OPENERP_ERROR_LOG_NAME,
+        'OPENERP_ERROR_LOG_PATH' : OPENERP_ERROR_LOG_PATH,
     }
     require.directory('/home/' + ADMIN_USER +'/scripts/',  mode='755', use_sudo=True)
     require.files.template_file(
-        path = '/home/' + ADMIN_USER +'/scripts/backup_databases.sh',
-        template_source = 'files/home/admin_user/scripts/backup_databases.sh',
+        path = '/home/' + ADMIN_USER +'/scripts/nightly_production.sh',
+        template_source = 'files/home/admin_user/scripts/nightly_production.sh',
         context = params,
         owner=ADMIN_USER, group=ADMIN_GROUP, mode='755', use_sudo = True,
     )
-    cron.add_task('backup_databases', OPENERP_BACKUP_TIMESPEC, 'root', '/home/' + ADMIN_USER +'/scripts/backup_databases.sh')
+    cron.add_task('nightly_production', OPENERP_BACKUP_TIMESPEC, 'root', '/home/' + ADMIN_USER +'/scripts/nightly_production.sh')
     
     require.user(SYSTEM_BACKUP_USER,
         password=SYSTEM_BACKUP_PWD,
